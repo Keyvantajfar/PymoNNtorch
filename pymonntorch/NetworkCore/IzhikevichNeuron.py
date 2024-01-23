@@ -15,8 +15,7 @@ class Izhikevich_Neuron(Behavior):
 				if v > 30 mV then {v = c and u = u + d}
 	"""
  
-	def initialize(self, neurons, c=-65.0, u=-14.0, a=0.02, b=0.2, d=8.0, threshold=30.0, dt=0.5):
-		""""""
+	def initialize(self, neurons, c=-65.0, u=-14.0, a=0.02, b=0.2, d=8.0, threshold=30.0, dt=0.5, voltage_i=0.0):
 		super().initialize(neurons)
 
 		# Internal state of neuron
@@ -25,6 +24,11 @@ class Izhikevich_Neuron(Behavior):
 		neurons.spike_traces = neurons.vector(mode = "zeros")
 		neurons.spikes = neurons.vector(mode = "zeros")
 		neurons.spike = neurons.vector(mode = "zeros") > 0
+
+		# External input
+		# neurons.voltage_i = (20 * neurons.vector(mode = 'uniform')) if voltage_i == 0.0 else (neurons.vector(mode = "zeros") + voltage_i) """ this doesnt work since i cannot set inputs of Initialize functions when i am sending attributes to the behaviour dinctionary when i am making an instance of this class. only default parameters are used. """
+		# neurons.voltage_i = neurons.vector(mode = "zeros") + voltage_i
+		neurons.voltage_i = 20 * neurons.vector(mode = 'uniform')
 
 		# Model coefficients
 		self.a = a                  # Time scale of the recovery variable
@@ -37,7 +41,6 @@ class Izhikevich_Neuron(Behavior):
 		return 0
 
 	def forward(self, neurons):
-		""""""
 		voltage, u, a, b, c, d, voltage_max, dt = neurons.voltage, neurons.u, self.a, self.b, self.c, self.d, self.threshold, neurons.dt
 
 		# Calculating the spikes
@@ -65,17 +68,4 @@ class Izhikevich_Neuron(Behavior):
 
 class Izhikevich_Neuron_Input(Izhikevich_Neuron):
 	def initialize(self, neurons):
-		""""""
-		# External input
-		self.voltage_i = self.parameter("voltage_i", 0.0)
-		self.tmp = (20 * neurons.vector(mode = 'uniform')) if self.voltage_i == 0.0 else (neurons.vector(mode = "zeros") + self.voltage_i)
-		neurons.voltage_i = self.tmp
-
 		return 0
-
-	def forward(self, neurons):
-		""""""
-		neurons.voltage_i = self.tmp
-
-		return 0		
-	

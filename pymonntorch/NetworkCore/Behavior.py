@@ -55,7 +55,7 @@ class Behavior(TaggableObject):
         """
         pass
 
-    def __str__(self):
+    def __repr__(self):
         result = self.__class__.__name__ + "("
         for k in self.init_kwargs:
             result += str(k) + "=" + str(self.init_kwargs[k]) + ","
@@ -113,7 +113,7 @@ class Behavior(TaggableObject):
     def check_unused_attrs(self):
         """Checks whether all attributes have been used in the `initialize` method."""
         for key in self.init_kwargs:
-            if not key in self.used_attr_keys:
+            if key not in self.used_attr_keys:
                 print(
                     'Warning: "'
                     + key
@@ -123,17 +123,19 @@ class Behavior(TaggableObject):
                     + key
                     + '" is spelled correctly and parameter('
                     + key
-                    + ",...) is called in initialize. Valid attributes are:"
-                    + str(self.used_attr_keys)
+                    + ",...) is called in initialize. Valid attributes are: "
+                    + ", ".join([f'"{param}"' for param in list(self.used_attr_keys)])
+                    + "."
                 )
 
     def parameter(
         self,
         key,
-        default,
+        default=None,
         object=None,
         do_not_diversify=False,
         search_other_behaviors=False,
+        tensor=False,
         required=False,
     ):
         """Gets the value of an attribute.
@@ -144,22 +146,24 @@ class Behavior(TaggableObject):
             object (NetworkObject): The object possessing the behavior.
             do_not_diversify (bool): Whether to diversify the attribute. The default is False.
             search_other_behaviors (bool): Whether to search for the attribute in other behaviors of the object. The default is False.
+            tensor (bool): Whether to make a tensor out of value. Suitable for list and numbers.
             required (bool): Whether the attribute is required. The default is False.
 
         Returns:
             any: The value of the attribute.
         """
-        if required and not key in self.init_kwargs:
+        if required and self.init_kwargs.get(key, None) is None:
             print(
                 "Warning:",
                 key,
-                "has to be specified for the behavior to run properly.",
+                "has to be specified for the behavior with a non None value to run properly.",
                 self,
             )
 
         self.used_attr_keys.append(key)
 
         result = self.init_kwargs.get(key, default)
+        result = default if result is None else result
 
         if (
             key not in self.init_kwargs
@@ -179,6 +183,15 @@ class Behavior(TaggableObject):
 
             result = type(default)(result)
 
+        if tensor and result is not None:
+            if object is None:
+                raise RuntimeError(
+                    f'To turn parameter value of key "{key}" to a tensor, object should not be None.'
+                )
+            result = torch.tensor(result, device=object.device)
+            if result.is_floating_point():
+                result = result.to(dtype=object.def_dtype)
+
         return result
 
     def is_empty_iteration_function(self):
@@ -193,7 +206,7 @@ class Behavior(TaggableObject):
             pass
 
         def empty_func_with_docstring():
-            # Empty function with docstring.
+            """Empty function with docstring."""
             pass
 
         def constants(f):

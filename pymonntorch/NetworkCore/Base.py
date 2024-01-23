@@ -44,6 +44,8 @@ class NetworkObject(TaggableObject):
 
         self.analysis_modules = []
 
+        self.recording = True
+
     def add_behavior(self, key, behavior, initialize=True):
         """Add a single behavior to the network object.
 
@@ -55,7 +57,7 @@ class NetworkObject(TaggableObject):
         Returns:
             Behavior: The behavior.
         """
-        if not key in self.behavior:
+        if key not in self.behavior:
             self.behavior[key] = behavior
             self.network._add_behavior_to_sorted_execution_list(
                 key, self, self.behavior[key]
@@ -209,7 +211,7 @@ class NetworkObject(TaggableObject):
 
         The tensor can be initialized in different modes. List of possible values for mode includes:
         - "random" or "rand" or "rnd" or "uniform": Uniformly distributed random numbers in range [0, 1).
-        - "normal": Normally distributed random numbers with zero mean and unit variance.
+        - "normal(mean=a, std=b)": Normally distributed random numbers with `a` as mean and `b` as standard derivation.
         - "ones": Tensor filled with ones.
         - "zeros": Tensor filled with zeros.
         - A single number: Tensor filled with that number.
@@ -225,26 +227,35 @@ class NetworkObject(TaggableObject):
 
         Returns:
             torch.Tensor: The initialized tensor."""
+
+        dtype = self.def_dtype if dtype is None else dtype
+
         if mode not in self._mat_eval_dict:
             prefix = "torch."
+            ev_str = mode
 
-            if mode == "random" or mode == "rand" or mode == "rnd" or mode == "uniform":
-                mode = "rand"
+            if (
+                ev_str == "random"
+                or ev_str == "rand"
+                or ev_str == "rnd"
+                or ev_str == "uniform"
+            ):
+                ev_str = "rand"
 
-            if type(mode) == int or type(mode) == float:
-                mode = "ones()*" + str(mode)
+            if type(ev_str) == int or type(ev_str) == float:
+                ev_str = "ones()*" + str(ev_str)
 
-            mode = prefix + mode
-            if "(" not in mode and ")" not in mode:
-                mode += "()"
+            ev_str = prefix + ev_str
+            if "(" not in ev_str and ")" not in ev_str:
+                ev_str += "()"
 
-            if dtype is not None:
-                mode = mode.replace(")", f",dtype={dtype})")
-            else:
-                mode = mode.replace(")", f",dtype={self.def_dtype})")
+            a1 = "size=dim,device=self.device,dtype=dtype)"
 
-            a1 = "dim,device=" + f"'{self.device}'"
-            ev_str = mode.replace("(", "(" + a1)
+            # check for positional argument
+            if ev_str[ev_str.index("(") + 1 : ev_str.index(")")].strip():
+                a1 = "," + a1
+
+            ev_str = ev_str.replace(")", a1)
             self._mat_eval_dict[mode] = compile(ev_str, "<string>", "eval")
 
         result = eval(self._mat_eval_dict[mode])
@@ -268,6 +279,30 @@ class NetworkObject(TaggableObject):
 
         return result
 
+    def tensor(self, mode, dim, scale=None, density=None, dtype=None):
+        """Get a tensor with desired dimensionality.
+
+        The tensor can be initialized in different modes. List of possible values for mode includes:
+        - "random" or "rand" or "rnd" or "uniform": Uniformly distributed random numbers in range [0, 1).
+        - "normal(mean=a, std=b)": Normally distributed random numbers with `a` as mean and `b` as standard derivation.
+        - "ones": Tensor filled with ones.
+        - "zeros": Tensor filled with zeros.
+        - A single number: Tensor filled with that number.
+        - You can also use any function from torch package for this purpose.
+
+        Args:
+            mode (str): Mode to be used to initialize tensor.
+            dim (int or tuple of int): Dimensionality of the tensor.
+            scale (float): Scale of the tensor. The default is None (i.e. No scaling is applied).
+            density (float): Density of the tensor. The default is None (i.e. dense tensor).
+            dtype (str or type): Data type of the tensor. If None, `def_dtype` will be used.
+
+        Returns:
+            torch.Tensor: The initialized tensor."""
+        return self._get_mat(
+            mode=mode, dim=dim, scale=scale, density=density, dtype=dtype
+        )
+
     def get_buffer_mat(self, dim, size, **kwargs):
         """Get a buffer of specific size with object's dimensionality.
 
@@ -288,14 +323,22 @@ class NetworkObject(TaggableObject):
     @property
     def iteration(self):
         """int: iteration number or time step."""
-        return self._iteration
+        return self.network._iteration
 
     @iteration.setter
     def iteration(self, iteration):
         if iteration >= 0 and type(iteration) is int:
-            self._iteration = iteration
+            self.network._iteration = iteration
         else:
             print(
                 "WARNING: Attempting to set an invalid value for iteration!\n Setting iteration to zero..."
             )
-            self._iteration = 0
+            self.network._iteration = 0
+
+    @property
+    def def_dtype(self):
+        return self.network._def_dtype
+
+    @def_dtype.setter
+    def def_dtype(self, dtype):
+        self.network._def_dtype = dtype

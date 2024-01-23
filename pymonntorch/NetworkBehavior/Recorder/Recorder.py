@@ -23,7 +23,7 @@ class Recorder(Behavior):
     """This is the base class to record variables of a network object.
     
     Args:
-        variables (list of str): List of variable names to record.
+        variables (list of str): List of variable names to record. A variable should be of tensor type.
         gap_width (int): The intervals of time to record variables. The default is 0.
         tag (str): A tag name for the `Recorder` object. The default is None.
         max_length (int): The history buffer size. If `None`, the variables are recorded \
@@ -31,24 +31,47 @@ class Recorder(Behavior):
         auto_annotate (bool): This parameter specifies whether the variable names include the \
             network object prefix (neurons/synapse/n/s) or not. The default is True.
     """
+
     initialize_last = True
     visualization_module_outputs = []
+
+    def __init__(
+        self,
+        *args,
+        variables=None,
+        gap_width=0,
+        max_length=None,
+        auto_annotate=True,
+        tag=None,
+        **kwargs,
+    ):
+        super().__init__(
+            *args,
+            variables=variables,
+            gap_width=gap_width,
+            max_length=max_length,
+            auto_annotate=auto_annotate,
+            tag=tag,
+            **kwargs,
+        )
+        self.variables = {}
 
     def initialize(self, object):
         super().initialize(object)
 
-        variables = self.parameter('variables', [])
-        if variables == []:
-            variables = self.parameter('arg_0', [])
+        variables = self.parameter("variables", None)
+        if variables is None:
+            variables = self.parameter("arg_0", None)
+            if variables is None:
+                variables = []
         if isinstance(variables, str):
             variables = [variables]
 
-        self.gap_width = self.parameter('gap_width', 0)
-        self.max_length = self.parameter('max_length', None)
-        self.auto_annotate = self.parameter('auto_annotate', True)
+        self.gap_width = self.parameter("gap_width", 0)
+        self.max_length = self.parameter("max_length", None)
+        self.auto_annotate = self.parameter("auto_annotate", True)
         self.counter = 0
         self.new_data_available = False
-        self.variables = {}
         self.compiled = {}
 
         self.add_variables(variables)
@@ -201,6 +224,7 @@ class EventRecorder(Recorder):
         auto_annotate (bool): This parameter specifies whether the variable names include the \
             network object prefix (neurons/synapse/n/s) or not. The default is True.
     """
+
     def find_objects(self, key):
         result = []
         if key in self.variables:

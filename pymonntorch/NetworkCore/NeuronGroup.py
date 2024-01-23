@@ -61,18 +61,25 @@ class NeuronGroup(NetworkObject):
 
         self.mask = True
 
-        self.learning = True
-        self.recording = True
+        if net.index_neurons:
+            self.id = torch.arange(self.size, device=self.device)
 
-        self.id = torch.arange(self.size, device=self.device)
+    def synapses(self, mode, tag="All"):
+        """Get synapses connected to the NeuronGroup.
 
-    @property
-    def def_dtype(self):
-        self.network.def_dtype
+        Args:
+            mode (str or bool): Whether to return efferent or afferent synapses connected to the NeuronGroup.
+                                Values indicating afferent: ` "afferent", "dendrite", "pre", "preSynaptic", 0, False `
+                                Values indicating efferent: ` "efferent", "axon", "post", "postSynaptic", 1 , True`
+            tag (str, optional): Filters Synapses to have provided tag . Defaults to "All".
 
-    @property
-    def iteration(self):
-        return self.network.iteration
+        Returns:
+            List[SynapseGroup]: The list containing SynapseGroups
+        """
+        if mode in ["afferent", "dendrite", "pre", "preSynaptic", 0]:
+            return self.afferent_synapses[tag]
+        if mode in ["efferent", "axon", "post", "postSynaptic", 1]:
+            return self.efferent_synapses[tag]
 
     def require_synapses(self, name, afferent=True, efferent=True, warning=True):
         """Require the existence of synapses.
@@ -115,7 +122,7 @@ class NeuronGroup(NetworkObject):
             torch.Tensor: The initialized tensor."""
         return self._get_mat(
             mode=mode,
-            dim=(self.size),
+            dim=(self.size,),
             scale=scale,
             density=density,
             plot=plot,
@@ -150,7 +157,7 @@ class NeuronGroup(NetworkObject):
             source_num += s
         return self.size, source_num
 
-    def __str__(self):
+    def __repr__(self):
         result = "NeuronGroup" + str(self.tags) + "(" + str(self.size) + "){"
         for k in sorted(list(self.behavior.keys())):
             result += str(k) + ":" + str(self.behavior[k])
@@ -349,10 +356,6 @@ class NeuronGroup(NetworkObject):
             torch.Tensor: The masked variable.
         """
         return var
-
-    @property
-    def def_dtype(self):
-        return self.network.def_dtype
 
 
 class NeuronSubGroup:
