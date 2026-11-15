@@ -81,7 +81,7 @@ In most simulations, we need to keep track of variables through time. To do so, 
                         9: Recorder(['voltage', 'torch.mean(voltage)']),
                         10: EventRecorder(['spike'])
                     })
-    SynapseGroup(ng, ng, net, tag='GLUTAMATE')
+    SynapseGroup(net=net, src=ng, dst=ng, tag='GLUTAMATE')
     net.initialize()
     net.simulate_iterations(1000)
 

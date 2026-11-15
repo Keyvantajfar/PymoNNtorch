@@ -3,10 +3,8 @@
 """Tests for `pymonntorch` package."""
 
 import pytest
+import torch
 
-# from click.testing import CliRunner
-
-# from pymonntorch import cli
 import pymonntorch
 
 
@@ -58,7 +56,7 @@ def test_network_cpu_annotated():
             10: EventRecorder(["n.spike"]),
         },
     )
-    SynapseGroup(ng, ng, net, tag="GLUTAMATE")
+    SynapseGroup(net=net, src=ng, dst=ng, tag="GLUTAMATE")
     net.initialize()
     net.simulate_iterations(1000)
 
@@ -69,6 +67,7 @@ def test_network_cpu_annotated():
         assert b.device == "cpu"
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is not available")
 def test_network_cuda_annotated():
     from pymonntorch import (
         Network,
@@ -117,7 +116,7 @@ def test_network_cuda_annotated():
             10: EventRecorder(["n.spike"]),
         },
     )
-    SynapseGroup(ng, ng, net, tag="GLUTAMATE")
+    SynapseGroup(net=net, src=ng, dst=ng, tag="GLUTAMATE")
     net.initialize()
     net.simulate_iterations(1000)
 
@@ -137,3 +136,23 @@ def test_network_cuda_annotated():
 #     help_result = runner.invoke(cli.main, ['--help'])
 #     assert help_result.exit_code == 0
 #     assert '--help  Show this message and exit.' in help_result.output
+
+
+def test_sub_structures_hierarchy():
+    from pymonntorch import Network, NeuronGroup
+
+    net = Network()
+    parent = NeuronGroup(net=net, size=4, tag="parent")
+    child = NeuronGroup(net=net, size=4, tag="child")
+    grandchild = NeuronGroup(net=net, size=4, tag="grandchild")
+    parent.add_sub_structure(child)
+    child.add_sub_structure(grandchild)
+
+    assert parent.all_sub_structure() == [child, grandchild]
+    assert child.all_sub_structure() == [grandchild]
+    assert grandchild.all_sub_structure() == []
+
+    other_net = Network()
+    stranger = NeuronGroup(net=other_net, size=4, tag="stranger")
+    with pytest.raises(ValueError):
+        parent.add_sub_structure(stranger)

@@ -65,13 +65,20 @@ class NetworkObject(TaggableObject):
             self.sub_structures.append(new_structure)
             new_structure.parent_structure = self
         else:
-            print(f"ERROR: {new_structure.tags[0]} can not be a sub structure of {self.tags[0]} because of not mutual network.")
+            raise ValueError(
+                f"{new_structure.tags[0]} can not be a sub structure of "
+                f"{self.tags[0]} because they do not belong to the same network."
+            )
 
     def all_sub_structure(self):
-        """Returns a list of all sub_structures.
+        """Returns a flat list of all sub structures (children, grandchildren, ...).
+
+        Returns:
+            list: Every structure below this one in the hierarchy.
         """
         result = []
         for sub_struc in self.sub_structures:
+            result.append(sub_struc)
             result.extend(sub_struc.all_sub_structure())
         return result
 

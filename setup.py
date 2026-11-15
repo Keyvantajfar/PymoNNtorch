@@ -13,6 +13,7 @@ with open("HISTORY.rst") as history_file:
 requirements = [
     "numpy>=1.21.0",
     "torch>=1.11.0",
+    "sympy>=1.11",
 ]
 
 test_requirements = [
@@ -22,16 +23,17 @@ test_requirements = [
 setup(
     author="Computational Neuroscience Research Laboratory",
     author_email="ashenatena@gmail.com",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     description="PymoNNtorch is a Pytorch version of PymoNNto",
     install_requires=requirements,
