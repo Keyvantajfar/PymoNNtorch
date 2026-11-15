@@ -106,6 +106,15 @@ Similarly, you can write your own ``Behavior`` Modules with the same logic as ``
     plt.show()
 
 
+Examples
+--------
+
+The ``examples/`` directory contains runnable scripts, e.g. a population of
+Izhikevich neurons (``izhikevich_single_population.py``) and two populations
+connected by a synapse group (``izhikevich_two_populations.py``)::
+
+    python examples/izhikevich_single_population.py
+
 Credits
 -------
 

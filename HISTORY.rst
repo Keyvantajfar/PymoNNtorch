@@ -2,6 +2,14 @@
 History
 =======
 
+Unreleased
+----------
+
+* Izhikevich neuron model (`Izhikevich_Neuron`, `Izhikevich_Neuron_Input`).
+* Examples directory.
+* Fixes: `all_sub_structure` now includes direct children, missing `sympy` dependency, test suite updated to current signatures.
+* GitHub Actions test workflow replaces Travis CI.
+
 0.1.4 (2024-03-16)
 ------------------
 
