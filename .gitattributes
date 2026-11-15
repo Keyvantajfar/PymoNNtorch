@@ -1,0 +1,4 @@
+* text=auto
+*.png binary
+*.fs text eol=lf
+*.vs text eol=lf
