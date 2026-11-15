@@ -63,3 +63,8 @@ Basics
 
 .. automodule:: pymonntorch.NetworkBehavior.Basics.Normalization
     :members:
+Neuron Models
+=============
+
+.. automodule:: pymonntorch.NetworkBehavior.Neuron.Izhikevich
+    :members:

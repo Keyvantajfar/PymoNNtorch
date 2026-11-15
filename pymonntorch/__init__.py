@@ -20,4 +20,6 @@ from pymonntorch.NetworkBehavior.EulerEquationModules.VariableInitializer import
 
 from pymonntorch.NetworkBehavior.Structure.Structure import *
 
+from pymonntorch.NetworkBehavior.Neuron.Izhikevich import *
+
 from pymonntorch.NetworkBehavior.Recorder.Recorder import *
