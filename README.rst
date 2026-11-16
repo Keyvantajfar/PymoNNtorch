@@ -115,6 +115,25 @@ connected by a synapse group (``izhikevich_two_populations.py``)::
 
     python examples/izhikevich_single_population.py
 
+Visualization (optional)
+------------------------
+
+A real-time OpenGL viewer is available as an optional extra::
+
+    pip install "pymonntorch[viz]"        # CPU
+    pip install "pymonntorch[viz-cuda]"   # also supports networks on a CUDA GPU
+
+.. code-block:: python
+
+    from pymonntorch.visualizer import GUI
+
+    net.initialize()
+    GUI(net, variable="trace").initializeOpenGL()
+
+Every neuron group needs a 1-D tensor named by ``variable`` that behaviors update
+**in place** (``ng.trace += ...``). See ``examples/visualizer_gui.py``.
+The visualizer is experimental.
+
 Credits
 -------
 

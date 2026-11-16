@@ -7,6 +7,8 @@ Unreleased
 
 * Izhikevich neuron model (`Izhikevich_Neuron`, `Izhikevich_Neuron_Input`).
 * Examples directory.
+* Optional real-time OpenGL visualizer (`pymonntorch.visualizer`, install with `pip install "pymonntorch[viz]"`).
+* Benchmarks restored in `benchmark/`.
 * Fixes: `all_sub_structure` now includes direct children, missing `sympy` dependency, test suite updated to current signatures.
 * GitHub Actions test workflow replaces Travis CI.
 

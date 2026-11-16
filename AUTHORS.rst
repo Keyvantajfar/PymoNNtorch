@@ -18,5 +18,6 @@ Contributors
 * Keywan Tajfar <tajfar3@gmail.com>
 * Ali Rahimi <saeed.ali.rahimi@gmail.com>
 * Amir H. Ebrahimi <amirhosseinebrahimi77@gmail.com>
+* Ali Asgari (real-time visualizer)
 
 **Note:** All benchmark codes are provided by Ali Rahimi & Marius Vieth.

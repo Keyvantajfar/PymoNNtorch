@@ -39,7 +39,26 @@ setup(
     install_requires=requirements,
     license="MIT license",
     long_description=readme + "\n\n" + history,
+    extras_require={
+        "viz": [
+            "glfw",
+            "PyOpenGL",
+            "imgui-bundle",
+            "pyglm",
+            "Pillow",
+        ],
+        # CUDA/OpenGL interop, needed to visualize networks living on a GPU
+        "viz-cuda": [
+            "glfw",
+            "PyOpenGL",
+            "imgui-bundle",
+            "pyglm",
+            "Pillow",
+            "cuda-python",
+        ],
+    },
     include_package_data=True,
+    package_data={"pymonntorch.visualizer": ["*.vs", "*.fs", "icons/*.png"]},
     keywords="pymonntorch",
     name="pymonntorch",
     packages=find_packages(include=["pymonntorch", "pymonntorch.*"]),
